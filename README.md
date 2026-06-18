@@ -104,6 +104,18 @@ npm run build    # build de producción en dist/
 npm run preview  # sirve la build de producción
 ```
 
+## Despliegue (GitHub Pages)
+
+El repo incluye un workflow (`.github/workflows/deploy.yml`) que, en cada push a
+`main`, compila y publica `dist/` en GitHub Pages. La base del sitio está fijada
+en `vite.config.ts` (`/Fm-Viso-BIM-IFC-TOpenC/`) y los recursos (worker, WASM,
+modelo de ejemplo) se cargan vía `import.meta.env.BASE_URL`, así que funcionan
+tanto en local como bajo el subpath de Pages.
+
+Para activarlo (una sola vez): en el repositorio, **Settings → Pages → Build and
+deployment → Source: GitHub Actions**. Tras el primer despliegue, el visor queda
+en `https://franco07l.github.io/Fm-Viso-BIM-IFC-TOpenC/`.
+
 ## Arquitectura
 
 Estructura modular: un núcleo crea el contexto del visor y la UI, y cada
