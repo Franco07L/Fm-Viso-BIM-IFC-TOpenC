@@ -1,0 +1,27 @@
+{
+  "name": "bim-ifc-viewer",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "copy-assets": "node scripts/copy-assets.mjs",
+    "postinstall": "node scripts/copy-assets.mjs",
+    "predev": "node scripts/copy-assets.mjs",
+    "dev": "vite",
+    "prebuild": "node scripts/copy-assets.mjs",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@thatopen/components": "^3.4.6",
+    "@thatopen/components-front": "^3.4.3",
+    "@thatopen/fragments": "^3.4.5",
+    "three": "^0.184.0",
+    "web-ifc": "^0.0.77"
+  },
+  "devDependencies": {
+    "@types/three": "^0.184.1",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.16"
+  }
+}

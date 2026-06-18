@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Visor BIM · IFC</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏗️</text></svg>"
+    />
+  </head>
+  <body>
+    <div id="viewer"></div>
+
+    <!-- Barra lateral izquierda: rail de iconos + panel desplegable -->
+    <div id="sidebar"></div>
+
+    <header id="toolbar">
+      <h1>Visor BIM <span>IFC</span></h1>
+      <button id="btn-load" class="btn primary" type="button">Cargar IFC</button>
+      <button id="btn-sample" class="btn" type="button">Modelo de ejemplo</button>
+      <button id="btn-style" class="btn" type="button">Estilo: Normal</button>
+      <button id="btn-env" class="btn" type="button">Ambiente</button>
+      <span id="theme-host"></span>
+      <input id="file-input" type="file" accept=".ifc" multiple hidden />
+    </header>
+
+    <aside id="panel">
+      <div id="panel-header">
+        <h2>Propiedades</h2>
+        <span id="panel-count"></span>
+      </div>
+      <div id="panel-body">
+        <p class="empty">
+          Ningún elemento seleccionado.<br />
+          Carga un modelo IFC y haz click sobre un elemento para ver sus
+          propiedades.
+        </p>
+      </div>
+    </aside>
+
+    <!-- Capa de overlays sobre el visor (barra inferior de herramientas) -->
+    <div id="viewer-overlay"></div>
+
+    <div id="loading" hidden>
+      <div class="loading-box">
+        <div class="spinner"></div>
+        <p id="loading-text">Procesando IFC…</p>
+        <div class="progress"><div id="progress-bar"></div></div>
+      </div>
+    </div>
+
+    <div id="dropzone" hidden><span>Suelta aquí tu archivo .ifc</span></div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
