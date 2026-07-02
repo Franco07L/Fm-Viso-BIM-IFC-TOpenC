@@ -60,6 +60,10 @@ export const icons = {
   clash: svg(
     '<rect x="3" y="3" width="11" height="11" rx="1"/><rect x="10" y="10" width="11" height="11" rx="1"/>',
   ),
+  filter: svg('<path d="M3 5h18l-7 8v6l-4-2v-4L3 5z"/>'),
+  audit: svg(
+    '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2h6v2M9 11l2 2 4-4"/><path d="M9 16h6"/>',
+  ),
   table: svg(
     '<rect x="3" y="3" width="18" height="18" rx="1"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>',
   ),

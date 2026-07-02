@@ -17,6 +17,11 @@ import { setupMarkers } from "./features/markers";
 import { setupBcf } from "./features/bcf";
 import { setupInventory } from "./features/inventory";
 import { setupClash } from "./features/clash";
+import { initDataCache } from "./core/datacache";
+import { setupDatatable } from "./features/datatable";
+import { setupAudit } from "./features/audit";
+import { setupFilters } from "./features/filters";
+import { setupSectionBox, setupCapture } from "./features/sectionbox";
 import "./style.css";
 
 async function main() {
@@ -48,6 +53,14 @@ async function main() {
   setupBcf(viewer, ui);
   setupInventory(viewer, ui);
   await setupClash(viewer, ui);
+
+  // Datos tabulares compartidos (tabla, auditoría, filtros) + extras
+  initDataCache(viewer);
+  setupFilters(viewer, ui);
+  setupAudit(viewer, ui);
+  setupSectionBox(viewer, ui);
+  setupDatatable(viewer, ui);
+  setupCapture(viewer, ui);
 
   // Acceso de depuración desde la consola del navegador
   (window as unknown as { __viewer: typeof viewer }).__viewer = viewer;

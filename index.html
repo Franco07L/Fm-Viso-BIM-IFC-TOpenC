@@ -18,11 +18,13 @@
     <header id="toolbar">
       <h1>Visor BIM <span>IFC</span></h1>
       <button id="btn-load" class="btn primary" type="button">Cargar IFC</button>
+      <button id="btn-load-folder" class="btn" type="button" title="Carga todos los .ifc de una carpeta (y subcarpetas) de una vez">Cargar carpeta</button>
       <button id="btn-sample" class="btn" type="button">Modelo de ejemplo</button>
       <button id="btn-style" class="btn" type="button">Estilo: Normal</button>
       <button id="btn-env" class="btn" type="button">Ambiente</button>
       <span id="theme-host"></span>
       <input id="file-input" type="file" accept=".ifc" multiple hidden />
+      <input id="folder-input" type="file" webkitdirectory multiple hidden />
     </header>
 
     <aside id="panel">

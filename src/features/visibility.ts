@@ -28,10 +28,15 @@ export function setupVisibility(viewer: Viewer, ui: UI) {
     return false;
   };
 
+  let ghostOn = false;
+  let ghostBtn: import("../core/toolbar").ToolButton | null = null;
+
   const showAll = async () => {
     if (!requireModels()) return;
     await hider.set(true);
     for (const model of viewer.models()) await model.resetOpacity(undefined);
+    ghostOn = false;
+    ghostBtn?.setActive(false);
     await viewer.update();
   };
 
@@ -47,13 +52,20 @@ export function setupVisibility(viewer: Viewer, ui: UI) {
     await viewer.update();
   };
 
-  // X-ray: deja la selección sólida y el resto translúcido (sin ocultarlo).
+  // Ghost global (estilo BIMETRYC): toggle que deja TODO translúcido; si hay
+  // selección, esta queda sólida. Volver a pulsar restaura la opacidad.
   const ghost = async () => {
-    if (!requireSelection()) return;
-    for (const model of viewer.models()) await model.setOpacity(undefined, 0.1);
-    for (const [modelId, ids] of Object.entries(viewer.selection())) {
-      const model = viewer.fragments.list.get(modelId);
-      if (model && ids.size) await model.resetOpacity([...ids]);
+    if (!requireModels()) return;
+    ghostOn = !ghostOn;
+    ghostBtn?.setActive(ghostOn);
+    if (ghostOn) {
+      for (const model of viewer.models()) await model.setOpacity(undefined, 0.12);
+      for (const [modelId, ids] of Object.entries(viewer.selection())) {
+        const model = viewer.fragments.list.get(modelId);
+        if (model && ids.size) await model.resetOpacity([...ids]);
+      }
+    } else {
+      for (const model of viewer.models()) await model.resetOpacity(undefined);
     }
     await viewer.update();
   };
@@ -77,10 +89,10 @@ export function setupVisibility(viewer: Viewer, ui: UI) {
     title: "Ocultar la selección",
     onClick: () => void hide(),
   });
-  bottomBar.addButton({
+  ghostBtn = bottomBar.addButton({
     icon: icons.ghost,
     label: "Ghost",
-    title: "Fantasma: deja translúcido todo menos la selección",
+    title: "Fantasma global: todo translúcido (la selección queda sólida). Pulsa de nuevo para restaurar.",
     onClick: () => void ghost(),
   });
   bottomBar.addSeparator();
