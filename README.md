@@ -56,6 +56,32 @@ Visor BIM web para archivos IFC construido con el ecosistema de
   visual. "Restaurar" los devuelve a su sitio. Ningún visor BIM lo trae nativo;
   se construye con el `Mesher` (geometría real) + `Hider`.
 
+### Tabla BIM, Auditoría y Filtros (datos tabulares)
+- **Tabla BIM inferior**: todos los elementos en tabla con columnas
+  configurables por propiedad, búsqueda, contador, click en fila →
+  selecciona/enfoca en 3D, y export **Excel/CSV** (UTF-8 con BOM, listo para
+  Power BI) y **JSON**.
+- **Auditoría** (estilo Quantor): elige parámetros clave y cuenta cuántos
+  elementos los tienen vacíos ("Sin código: 44"…), con seleccionar/aislar los
+  faltantes y **heatmap** rojo/verde de completitud.
+- **Filtros**: condiciones apilables (propiedad + operador + valor, en Y/O)
+  con acciones (seleccionar/aislar/ghost/color/ver en tabla) y **vistas
+  guardadas** con nombre (localStorage).
+- Los tres comparten un **cache tabular** (`core/datacache.ts`) que indexa por
+  lotes solo elementos geométricos.
+
+### Carga de carpeta y puente con Revit (FM Pro)
+- **Cargar carpeta**: un click carga todos los `.ifc` de una carpeta y sus
+  subcarpetas (ideal tras exportar disciplinas por separado).
+- **Auto-carga `?load=`**: si la URL trae `?load=<manifestUrl>`, el visor
+  descarga y carga automáticamente los IFC listados. Es el protocolo del addin
+  **FM Pro → Export IFC** (Revit): exporta, levanta un puente local efímero y
+  abre el visor con todo cargado, sin pasos manuales.
+
+### Extras
+- **Ghost global** (toggle), **Caja de sección** de 6 planos arrastrables, y
+  **Captura PNG** de la vista actual.
+
 ### Detección de interferencias / Clash (panel *Interferencias*)
 - **Cruza por el criterio que elijas**: categoría, modelo o parámetro
   (disciplina/subdisciplina leída de los psets). Con **varios IFC cargados**
