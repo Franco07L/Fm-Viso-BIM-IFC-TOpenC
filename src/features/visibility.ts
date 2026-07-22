@@ -82,24 +82,28 @@ export function setupVisibility(viewer: Viewer, ui: UI) {
   bottomBar.addButton({
     icon: icons.eye,
     label: "Todo",
+    group: "view",
     title: "Restaurar vista: muestra todo, quita colores y transparencias aplicados por cualquier panel",
     onClick: () => void showAll(),
   });
   bottomBar.addButton({
     icon: icons.focus,
     label: "Aislar",
+    group: "view",
     title: "Aislar la selección (oculta el resto)",
     onClick: () => void isolate(),
   });
   bottomBar.addButton({
     icon: icons.eyeOff,
     label: "Ocultar",
+    group: "view",
     title: "Ocultar la selección",
     onClick: () => void hide(),
   });
   ghostBtn = bottomBar.addButton({
     icon: icons.ghost,
     label: "Ghost",
+    group: "view",
     title: "Fantasma global: todo translúcido (la selección queda sólida). Pulsa de nuevo para restaurar.",
     onClick: () => void ghost(),
   });
@@ -107,6 +111,7 @@ export function setupVisibility(viewer: Viewer, ui: UI) {
   bottomBar.addButton({
     icon: icons.home,
     label: "Encuadrar",
+    group: "view",
     title: "Encuadrar el modelo (tecla Inicio)",
     onClick: () => void viewer.fitToModels(),
   });

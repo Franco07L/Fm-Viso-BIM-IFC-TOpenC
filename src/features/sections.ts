@@ -29,6 +29,7 @@ export function setupSections(viewer: Viewer, ui: UI) {
   const button = ui.bottomBar.addButton({
     icon: icons.scissors,
     label: "Cortar",
+    group: "tool",
     title: "Modo corte: doble-click crea un plano · Supr borra · vuelve a pulsar para salir",
     toggle: true,
     onClick: (btn) => {
@@ -44,6 +45,8 @@ export function setupSections(viewer: Viewer, ui: UI) {
   ui.bottomBar.addButton({
     icon: icons.reset,
     label: "Sin cortes",
+    group: "tool",
+    subtle: true,
     title: "Eliminar todos los planos de corte",
     onClick: () => {
       clipper.deleteAll();

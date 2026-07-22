@@ -255,6 +255,7 @@ export function setupDatatable(viewer: Viewer, ui: UI) {
   const tableBtn = ui.bottomBar.addButton({
     icon: icons.table,
     label: "Tabla",
+    group: "data",
     title: "Tabla BIM: todos los elementos con sus propiedades, export Excel/CSV/JSON",
     onClick: () => {
       if (panel.hidden) void open();

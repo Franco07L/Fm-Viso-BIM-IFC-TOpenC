@@ -49,6 +49,7 @@ export function setupMeasurements(viewer: Viewer, ui: UI) {
   const button = ui.bottomBar.addButton({
     icon: icons.ruler,
     label: "Medir",
+    group: "tool",
     title: "Medir: doble-click pone puntos · Enter cierra · Supr borra · pulsa para cambiar de tipo",
     onClick: (btn) => {
       const next = active >= tools.length - 1 ? -1 : active + 1;
@@ -64,6 +65,8 @@ export function setupMeasurements(viewer: Viewer, ui: UI) {
   ui.bottomBar.addButton({
     icon: icons.reset,
     label: "Sin medidas",
+    group: "tool",
+    subtle: true,
     title: "Borrar todas las medidas",
     onClick: () => {
       for (const { comp } of tools) {

@@ -15,6 +15,40 @@ export function setupSectionBox(viewer: Viewer, ui: UI) {
   const boxer = viewer.components.get(OBC.BoundingBoxer);
   let planeIds: string[] = [];
 
+  /** Lee una variable CSS de color como THREE.Color (sigue el tema activo). */
+  const cssColor = (name: string, fallback: string): THREE.Color => {
+    const raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    try {
+      return new THREE.Color(raw || fallback);
+    } catch {
+      return new THREE.Color(fallback);
+    }
+  };
+
+  /**
+   * Afina los gizmos de un plano recién creado para que se sientan sutiles y
+   * futuristas en vez de las flechas gruesas por defecto de three:
+   * solo traslación (una caja de sección no se rota), gizmo más pequeño, y
+   * autoescala para que no se agigante en modelos grandes.
+   */
+  const refineGizmo = (id: string) => {
+    const plane = clipper.list.get(id);
+    if (!plane) return;
+    plane.autoScale = false;
+    try {
+      const controls = plane.controls;
+      controls.setMode?.("translate");
+      controls.setSize?.(0.5);
+      // El plano de corte solo desliza por su normal: sobran los handles de
+      // rotación y los cuadrados de traslación en plano.
+      const c = controls as unknown as Record<string, boolean>;
+      c.showX = c.showY = false;
+      c.showXY = c.showYZ = c.showXZ = false;
+    } catch {
+      /* si la versión de controls cambia, el plano sigue siendo usable */
+    }
+  };
+
   const selectionBox = async (): Promise<THREE.Box3> => {
     const selection = viewer.selection();
     const hasSelection = Object.values(selection).some((s) => s.size > 0);
@@ -53,9 +87,20 @@ export function setupSectionBox(viewer: Viewer, ui: UI) {
       { normal: new THREE.Vector3(0, 0, 1), point: new THREE.Vector3(center.x, center.y, min.z) },
     ];
 
+    // Plano de corte sutil: un tinte de vidrio en el acento del tema, no el
+    // relleno opaco por defecto. Se fija antes de crear los planos.
+    try {
+      clipper.config.color = cssColor("--accent", "#a855f7");
+      clipper.config.opacity = 0.06;
+    } catch {
+      /* config puede variar entre versiones; el corte funciona igual */
+    }
+
     clipper.enabled = true;
     for (const face of faces) {
-      planeIds.push(clipper.createFromNormalAndCoplanarPoint(viewer.world, face.normal, face.point));
+      const id = clipper.createFromNormalAndCoplanarPoint(viewer.world, face.normal, face.point);
+      planeIds.push(id);
+      refineGizmo(id);
     }
     await viewer.update();
     return true;
@@ -76,6 +121,7 @@ export function setupSectionBox(viewer: Viewer, ui: UI) {
   ui.bottomBar.addButton({
     icon: icons.cube,
     label: "Caja",
+    group: "tool",
     title: "Caja de sección alrededor de lo visible (o la selección). Arrastra los gizmos para ajustarla.",
     onClick: (btn) => {
       void (async () => {
@@ -101,6 +147,7 @@ export function setupCapture(viewer: Viewer, ui: UI) {
   ui.bottomBar.addButton({
     icon: icons.camera,
     label: "Captura",
+    group: "data",
     title: "Descargar una imagen PNG de la vista actual",
     onClick: () => {
       try {

@@ -29,6 +29,7 @@ export function setupMarkers(viewer: Viewer, ui: UI) {
   const markBtn = ui.bottomBar.addButton({
     icon: icons.pin,
     label: "Marcar",
+    group: "annotate",
     title: "Modo marcador: click sobre el modelo coloca un pin",
     toggle: true,
     onClick: (btn) => {
@@ -44,6 +45,8 @@ export function setupMarkers(viewer: Viewer, ui: UI) {
   ui.bottomBar.addButton({
     icon: icons.reset,
     label: "Sin marcas",
+    group: "annotate",
+    subtle: true,
     title: "Eliminar todos los marcadores",
     onClick: () => {
       for (const worldMarkers of marker.list.values()) {
