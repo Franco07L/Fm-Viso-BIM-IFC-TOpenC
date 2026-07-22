@@ -327,10 +327,27 @@ body {
   border: 1px solid var(--border);
   border-radius: 12px;
   box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45);
+  /* Sale de su disparador (el engranaje): crece desde la esquina superior
+     derecha, no aparece flotando de la nada. */
+  transform-origin: top right;
+  transition: opacity 160ms ease-out, transform 160ms ease-out;
+  opacity: 0;
+  transform: translateY(-6px) scale(0.96);
 }
 
 .tb-menu-panel[hidden] {
   display: none;
+}
+
+.tb-menu-panel.open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tb-menu-panel {
+    transition: none;
+  }
 }
 
 .tb-menu-title {
@@ -855,6 +872,24 @@ body {
   border-radius: 14px;
   overflow: hidden;
   z-index: 19;
+  /* Entra desde el rail (su disparador), no aparece de la nada. sidebar.ts
+     controla las clases: añade `.open` un frame después de quitar `hidden`
+     para que el navegador registre el estado de partida antes de animar. */
+  transform-origin: left center;
+  transition: opacity 190ms ease-out, transform 190ms ease-out;
+  opacity: 0;
+  transform: translateX(-14px) scale(0.97);
+}
+
+.sidebar-drawer.open {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-drawer {
+    transition: none;
+  }
 }
 
 .drawer-header {
@@ -1327,6 +1362,27 @@ body {
   box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45);
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
+  /* Se crea de nuevo cada vez que se abre (dropdown.ts), así que una animación
+     de entrada por @keyframes alcanza — no hay estado "cerrado" que mantener. */
+  animation: ddListIn 130ms ease-out;
+  transform-origin: top center;
+}
+
+@keyframes ddListIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dd-list {
+    animation: none;
+  }
 }
 
 .dd-option {
@@ -1476,6 +1532,26 @@ body {
   overflow: hidden;
   z-index: 80;
   box-shadow: 0 16px 44px rgba(0, 0, 0, 0.5);
+  /* Se crea de nuevo cada vez (clash.ts/schedule.ts la reconstruyen al abrir),
+     entra desde abajo — de la banda donde vive — en vez de aparecer de golpe. */
+  animation: floatIn 200ms ease-out;
+}
+
+@keyframes floatIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .matrix-float {
+    animation: none;
+  }
 }
 
 .matrix-head {

@@ -11,14 +11,25 @@ export function setupTopbar() {
   const menu = document.getElementById("settings-menu");
   if (!gear || !menu) return;
 
+  const ANIM_MS = 160; // debe coincidir con la duración de .tb-menu-panel en CSS
+  let hideTimer: number | undefined;
+
   const close = () => {
-    menu.hidden = true;
+    menu.classList.remove("open");
     gear.classList.remove("open");
     gear.setAttribute("aria-expanded", "false");
+    window.clearTimeout(hideTimer);
+    hideTimer = window.setTimeout(() => {
+      menu.hidden = true;
+    }, ANIM_MS);
   };
 
   const open = () => {
+    window.clearTimeout(hideTimer);
     menu.hidden = false;
+    menu.classList.remove("open");
+    void menu.offsetWidth; // fuerza el reflow: registra el estado cerrado antes de animar
+    menu.classList.add("open");
     gear.classList.add("open");
     gear.setAttribute("aria-expanded", "true");
   };

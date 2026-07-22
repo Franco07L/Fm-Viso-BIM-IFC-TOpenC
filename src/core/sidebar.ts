@@ -54,12 +54,21 @@ export function createSidebar(host: HTMLElement): Sidebar {
   }
   const entries = new Map<string, Entry>();
   let activeId: string | null = null;
+  let hideTimer: number | undefined;
+  const ANIM_MS = 190; // debe coincidir con la duración de .sidebar-drawer en CSS
 
   const close = () => {
     if (!activeId) return;
     entries.get(activeId)?.button.classList.remove("active");
     activeId = null;
-    drawer.hidden = true;
+    drawer.classList.remove("open");
+    // Espera a que termine la transición de salida antes de sacarlo del flujo
+    // (display:none no se puede animar). El timeout es red de seguridad si
+    // transitionend no llega a disparar (reduced-motion, tab en background).
+    window.clearTimeout(hideTimer);
+    hideTimer = window.setTimeout(() => {
+      drawer.hidden = true;
+    }, ANIM_MS);
   };
 
   const open = (id: string) => {
@@ -68,11 +77,23 @@ export function createSidebar(host: HTMLElement): Sidebar {
     if (activeId && activeId !== id) {
       entries.get(activeId)?.button.classList.remove("active");
     }
+    const wasClosed = drawer.hidden;
+    window.clearTimeout(hideTimer);
     activeId = id;
     entry.button.classList.add("active");
     drawerTitle.textContent = entry.title;
     drawerBody.replaceChildren(entry.body);
-    drawer.hidden = false;
+    if (wasClosed) {
+      drawer.hidden = false;
+      drawer.classList.remove("open");
+      // Fuerza el reflow para que el navegador registre el estado "cerrado"
+      // antes de animar a "abierto"; sin esto ambos cambios se agrupan en un
+      // solo frame y no hay transición que reproducir.
+      void drawer.offsetWidth;
+    }
+    // Cambiar de panel con el drawer ya abierto no reinicia la entrada — solo
+    // se anima al aparecer desde cerrado, cambiar de pestaña no debe parpadear.
+    drawer.classList.add("open");
     entry.onOpen?.();
   };
 
