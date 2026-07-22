@@ -16,13 +16,49 @@
     <div id="sidebar"></div>
 
     <header id="toolbar">
-      <h1>Visor BIM <span>IFC</span></h1>
+      <!-- Marca: cambiar aquí el nombre/logo del producto -->
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none">
+            <path d="M16 3 28 9.5v13L16 29 4 22.5v-13L16 3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+            <path d="M16 16 28 9.5M16 16v13M16 16 4 9.5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" opacity=".55"/>
+            <circle cx="16" cy="3" r="2.4" fill="currentColor"/>
+            <circle cx="28" cy="9.5" r="2.4" fill="currentColor"/>
+            <circle cx="4" cy="22.5" r="2.4" fill="currentColor"/>
+          </svg>
+        </span>
+        <span class="brand-text">
+          <strong>Visor BIM</strong>
+          <small>Gestión IFC</small>
+        </span>
+      </div>
+
+      <span class="tb-div" aria-hidden="true"></span>
+
       <button id="btn-load" class="btn primary" type="button">Cargar IFC</button>
-      <button id="btn-load-folder" class="btn" type="button" title="Carga todos los .ifc de una carpeta (y subcarpetas) de una vez">Cargar carpeta</button>
-      <button id="btn-sample" class="btn" type="button">Modelo de ejemplo</button>
-      <button id="btn-style" class="btn" type="button">Estilo: Normal</button>
-      <button id="btn-env" class="btn" type="button">Ambiente</button>
-      <span id="theme-host"></span>
+      <button id="btn-load-folder" class="btn" type="button" title="Carga todos los .ifc de una carpeta (y subcarpetas) de una vez">Carpeta</button>
+
+      <span class="tb-div" aria-hidden="true"></span>
+
+      <div class="tb-menu">
+        <button id="btn-settings" class="tb-gear" type="button" title="Vista y apariencia" aria-haspopup="true" aria-expanded="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 9 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4.6 9a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1Z"/>
+          </svg>
+          <span>Vista</span>
+        </button>
+        <div id="settings-menu" class="tb-menu-panel" hidden>
+          <span class="tb-menu-title">Modelo</span>
+          <button id="btn-sample" class="btn" type="button">Modelo de ejemplo</button>
+          <span class="tb-menu-title">Apariencia</span>
+          <button id="btn-style" class="btn" type="button">Estilo: Normal</button>
+          <button id="btn-env" class="btn" type="button">Ambiente</button>
+          <span class="tb-menu-title">Tema</span>
+          <span id="theme-host"></span>
+        </div>
+      </div>
+
       <input id="file-input" type="file" accept=".ifc" multiple hidden />
       <input id="folder-input" type="file" webkitdirectory multiple hidden />
     </header>

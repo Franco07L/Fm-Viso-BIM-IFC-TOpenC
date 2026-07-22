@@ -169,16 +169,127 @@ body {
   z-index: 10;
 }
 
-#toolbar h1 {
-  margin: 0 6px 0 0;
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: 0.2px;
+/* ---------- Marca ---------- */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding-right: 2px;
 }
 
-#toolbar h1 span {
-  color: var(--accent);
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  color: var(--accent-text);
+  background: var(--btn-bg);
+  border-radius: 10px;
+  box-shadow: var(--glow);
+}
+
+.brand-mark svg {
+  width: 21px;
+  height: 21px;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.brand-text strong {
+  font-size: 14.5px;
   font-weight: 700;
+  letter-spacing: 0.2px;
+  color: var(--text);
+}
+
+.brand-text small {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+/* Divisor vertical entre bloques de la barra */
+.tb-div {
+  width: 1px;
+  height: 24px;
+  background: var(--border);
+}
+
+/* ---------- Menú "Vista" (ajustes ocasionales) ---------- */
+.tb-menu {
+  position: relative;
+}
+
+.tb-gear {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dim);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.tb-gear svg {
+  width: 16px;
+  height: 16px;
+}
+
+.tb-gear:hover,
+.tb-gear.open {
+  color: var(--text);
+  background: var(--hover);
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+}
+
+.tb-menu-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: 220px;
+  padding: 12px;
+  background: var(--panel-bg);
+  backdrop-filter: var(--panel-blur);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45);
+}
+
+.tb-menu-panel[hidden] {
+  display: none;
+}
+
+.tb-menu-title {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+.tb-menu-panel .btn {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.tb-menu-panel .dd {
+  width: 100%;
 }
 
 .btn {
@@ -618,8 +729,54 @@ body {
 
 .rail-sep {
   height: 1px;
-  margin: 4px 6px;
-  background: var(--border);
+  margin: 6px 8px;
+  background: color-mix(in srgb, var(--border) 75%, transparent);
+}
+
+/* Marca de panel activo: barra a la izquierda del icono */
+.rail-btn::before {
+  content: "";
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  width: 3px;
+  height: 0;
+  background: var(--accent-2);
+  border-radius: 0 3px 3px 0;
+  transform: translateY(-50%);
+  transition: height 0.18s ease;
+}
+
+.rail-btn.active::before {
+  height: 22px;
+}
+
+/* Tooltip propio: aparece al instante y respeta el tema (el `title` nativo
+   tarda ~1s y no se puede estilizar). */
+.rail-btn::after {
+  content: attr(data-label);
+  position: absolute;
+  left: calc(100% + 12px);
+  top: 50%;
+  z-index: 30;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+  transform: translateY(-50%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+.rail-btn:hover::after,
+.rail-btn:focus-visible::after {
+  opacity: 1;
 }
 
 .sidebar-drawer[hidden] {

@@ -83,7 +83,9 @@ export function createSidebar(host: HTMLElement): Sidebar {
       const button = el("button", "rail-btn");
       button.type = "button";
       button.innerHTML = icon;
-      button.title = title;
+      // `data-label` alimenta el tooltip propio (CSS): el `title` nativo tarda
+      // ~1s en aparecer y no se puede estilizar con el tema.
+      button.dataset.label = title;
       button.setAttribute("aria-label", title);
 
       const badge = el("span", "rail-badge");

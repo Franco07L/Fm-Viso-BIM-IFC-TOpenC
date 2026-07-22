@@ -27,6 +27,7 @@ import { setupPartidas } from "./features/partidas";
 import { setupObras } from "./features/obras";
 import { setupSchedule } from "./features/schedule";
 import { setupVersions } from "./features/versions";
+import { setupTopbar } from "./features/topbar";
 import "./style.css";
 
 async function main() {
@@ -47,27 +48,42 @@ async function main() {
   setupStyles(viewer);
   setupSelection(viewer);
   await setupLoader(viewer);
+  setupTopbar();
 
-  // Funcionalidades (cada una registra su panel/acciones en la UI)
+  // Acciones de la barra inferior (no registran panel lateral)
   setupVisibility(viewer, ui);
-  await setupClassification(viewer, ui);
   setupSections(viewer, ui);
   setupMeasurements(viewer, ui);
-  await setupViews(viewer, ui);
   setupMarkers(viewer, ui);
-  setupBcf(viewer, ui);
-  setupInventory(viewer, ui);
-  await setupClash(viewer, ui);
 
-  // Datos tabulares compartidos (tabla, auditoría, filtros) + extras
+  // El rail lateral se agrupa por intención de uso, con separadores entre
+  // bloques: explorar el modelo · analizarlo · gestionar la obra · colaborar.
   initDataCache(viewer);
+
+  // 1 · Explorar
+  await setupClassification(viewer, ui);
+  await setupViews(viewer, ui);
+  setupInventory(viewer, ui);
+  ui.sidebar.addSeparator();
+
+  // 2 · Analizar
+  await setupClash(viewer, ui);
+  setupFilters(viewer, ui);
+  setupAudit(viewer, ui);
+  ui.sidebar.addSeparator();
+
+  // 3 · Gestionar (la configuración de roles va primero: es su punto de partida)
   setupMapping(viewer, ui);
   setupPartidas(viewer, ui);
   setupObras(viewer, ui);
   setupSchedule(viewer, ui);
   setupVersions(viewer, ui);
-  setupFilters(viewer, ui);
-  setupAudit(viewer, ui);
+  ui.sidebar.addSeparator();
+
+  // 4 · Colaborar
+  setupBcf(viewer, ui);
+
+  // Extras de la barra inferior
   setupSectionBox(viewer, ui);
   setupDatatable(viewer, ui);
   setupCapture(viewer, ui);
