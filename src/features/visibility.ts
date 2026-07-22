@@ -31,10 +31,18 @@ export function setupVisibility(viewer: Viewer, ui: UI) {
   let ghostOn = false;
   let ghostBtn: import("../core/toolbar").ToolButton | null = null;
 
+  // El único reset que vive FUERA de cualquier panel: debe devolver el visor
+  // a como se ve un modelo recién cargado, sin importar qué función lo dejó
+  // así (Conjuntos, Auditoría, Interferencias, Obras, Cronograma, Versiones
+  // pintan color en 3D desde paneles distintos). Antes solo tocaba
+  // visibilidad/opacidad y el color pintado quedaba pegado.
   const showAll = async () => {
     if (!requireModels()) return;
     await hider.set(true);
-    for (const model of viewer.models()) await model.resetOpacity(undefined);
+    for (const model of viewer.models()) {
+      await model.resetOpacity(undefined);
+      await model.resetColor(undefined);
+    }
     ghostOn = false;
     ghostBtn?.setActive(false);
     await viewer.update();
@@ -74,7 +82,7 @@ export function setupVisibility(viewer: Viewer, ui: UI) {
   bottomBar.addButton({
     icon: icons.eye,
     label: "Todo",
-    title: "Mostrar todos los elementos",
+    title: "Restaurar vista: muestra todo, quita colores y transparencias aplicados por cualquier panel",
     onClick: () => void showAll(),
   });
   bottomBar.addButton({

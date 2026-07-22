@@ -642,14 +642,28 @@ export async function setupClash(viewer: Viewer, ui: UI) {
   };
 
   const updateSummary = () => {
+    summary.replaceChildren();
     if (!clashes.length) {
       summary.textContent = "Sin resultados todavía.";
+      panel.setBadge(null);
       return;
     }
     const open = clashes.filter((c) => c.state === "open").length;
     const reviewed = clashes.filter((c) => c.state === "reviewed").length;
     const solved = clashes.filter((c) => c.state === "solved").length;
-    summary.textContent = `${clashes.length} interferencias · ${open} abiertas · ${reviewed} revisadas · ${solved} resueltas`;
+
+    const bento = el("div", "bento");
+    for (const [cls, label, value] of [
+      ["total", "Total", clashes.length],
+      ["open", "Abiertas", open],
+      ["reviewed", "Revisadas", reviewed],
+      ["solved", "Resueltas", solved],
+    ] as const) {
+      const cell = el("div", `bento-cell ${cls}`);
+      cell.append(el("span", "bento-label", label), el("span", "bento-value", String(value)));
+      bento.append(cell);
+    }
+    summary.append(bento);
     panel.setBadge(open ? String(open) : null);
   };
 
@@ -796,13 +810,18 @@ export async function setupClash(viewer: Viewer, ui: UI) {
       const r = panel.getBoundingClientRect();
       ox = e.clientX - r.left;
       oy = e.clientY - r.top;
+      // La ventana se ancla con left+right+bottom (banda segura). Al arrastrar
+      // se pasa a left+top, así que hay que fijar el ancho actual o colapsaría.
+      panel.style.width = `${r.width}px`;
+      panel.style.right = "auto";
+      panel.style.bottom = "auto";
+      panel.style.top = `${r.top}px`;
       handle.setPointerCapture(e.pointerId);
     });
     handle.addEventListener("pointermove", (e) => {
       if (!dragging) return;
       panel.style.left = `${Math.max(0, e.clientX - ox)}px`;
       panel.style.top = `${Math.max(0, e.clientY - oy)}px`;
-      panel.style.right = "auto";
     });
     handle.addEventListener("pointerup", (e) => {
       dragging = false;
@@ -831,11 +850,20 @@ export async function setupClash(viewer: Viewer, ui: UI) {
       const hintLabel = el("span", "set-count", "Click en una celda para activar/desactivar el cruce");
       headActions.append(hintLabel);
     }
+    const mini = el("button", "icon-btn");
+    mini.type = "button";
+    mini.innerHTML = "—";
+    mini.title = "Minimizar (deja ver el modelo sin cerrar)";
+    mini.addEventListener("click", () => {
+      const small = box.classList.toggle("mini");
+      mini.innerHTML = small ? "▢" : "—";
+      mini.title = small ? "Restaurar" : "Minimizar (deja ver el modelo sin cerrar)";
+    });
     const close = el("button", "icon-btn");
     close.innerHTML = icons.close;
     close.title = "Cerrar";
     close.addEventListener("click", () => box.remove());
-    headActions.append(close);
+    headActions.append(mini, close);
     head.append(headActions);
     enableDrag(box, head);
 

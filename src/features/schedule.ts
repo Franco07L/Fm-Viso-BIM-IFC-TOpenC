@@ -253,13 +253,18 @@ export function setupSchedule(viewer: Viewer, ui: UI) {
       const r = box.getBoundingClientRect();
       ox = e.clientX - r.left;
       oy = e.clientY - r.top;
+      // Se ancla con left+right+bottom (banda segura); al arrastrar pasa a
+      // left+top, así que hay que fijar el ancho actual o colapsaría.
+      box.style.width = `${r.width}px`;
+      box.style.right = "auto";
+      box.style.bottom = "auto";
+      box.style.top = `${r.top}px`;
       handle.setPointerCapture(e.pointerId);
     });
     handle.addEventListener("pointermove", (e) => {
       if (!dragging) return;
       box.style.left = `${Math.max(0, e.clientX - ox)}px`;
       box.style.top = `${Math.max(0, e.clientY - oy)}px`;
-      box.style.right = "auto";
     });
     handle.addEventListener("pointerup", (e) => {
       dragging = false;
@@ -277,11 +282,20 @@ export function setupSchedule(viewer: Viewer, ui: UI) {
     const head = el("div", "matrix-head");
     head.append(el("h3", undefined, title));
     const acts = el("div", "matrix-head-actions");
+    const mini = el("button", "icon-btn");
+    mini.type = "button";
+    mini.innerHTML = "—";
+    mini.title = "Minimizar (deja ver el modelo sin cerrar)";
+    mini.addEventListener("click", () => {
+      const small = box.classList.toggle("mini");
+      mini.innerHTML = small ? "▢" : "—";
+      mini.title = small ? "Restaurar" : "Minimizar (deja ver el modelo sin cerrar)";
+    });
     const close = el("button", "icon-btn");
     close.innerHTML = icons.close;
     close.title = "Cerrar";
     close.addEventListener("click", () => box.remove());
-    acts.append(close);
+    acts.append(mini, close);
     head.append(acts);
     enableDrag(box, head);
     const scroll = el("div", "matrix-scroll");
