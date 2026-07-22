@@ -78,6 +78,51 @@ Visor BIM web para archivos IFC construido con el ecosistema de
   **FM Pro → Export IFC** (Revit): exporta, levanta un puente local efímero y
   abre el visor con todo cargado, sin pasos manuales.
 
+### Configuración de datos (mapeo de parámetros por rol)
+Cada empresa nombra distinto sus parámetros (`REP_ID-ACTIVIDAD`,
+`FAST_CODIGO_PARTIDA`…). En vez de imponer una convención, el panel
+*Configuración de datos* pregunta **una sola vez** qué parámetro del modelo
+cumple cada **rol** (código de partida, unidad, período ejecutado, código de
+actividad, volumen/área/longitud, diámetro y longitud de barra). Se guarda en
+el navegador y lo consumen Partidas, Avance de obra y Cronograma 4D. Incluye
+**detección automática** por patrones de nombre.
+
+### Partidas y metrado (QTO por presupuesto)
+- Árbol jerárquico del presupuesto (`07` → `07.02` → `07.02.01` → …) con el
+  **metrado calculado desde el modelo** según la unidad de cada partida:
+  m³→volumen, m²→área, ml→longitud, **kg→acero** (⌀ × longitud con la tabla
+  estándar 1/4"…1½"), otro→conteo.
+- Las ramas que agrupan **unidades distintas** se marcan "varios" y NO suman
+  (sumar m³ con m² no significa nada en un presupuesto).
+- Búsqueda, expandir/contraer, aislar en 3D y export a Excel.
+
+### Avance de obra (valorización real)
+- Lee el **período de ejecución real** etiquetado en el modelo (mes/semana/día)
+  y lo traduce a lectura visual: **color por período** (editable), transparencia
+  y visibilidad independientes, barra de % y **dona de avance**.
+- Metrado ejecutado por período, agrupado por unidad. Export a Excel.
+
+### Cronograma 4D, curva S y EVM
+- Carga el `cronograma_viewer.json` que genera el motor
+  **`bim4d_discretizer`** y lo cruza con el modelo por el rol *Código de
+  actividad*.
+- **Gantt navegable** (barras por actividad, eje de meses, dependencias,
+  click → aísla sus elementos en 3D).
+- **Simulación 4D**: un cursor de fecha pinta el modelo en
+  ejecutado / en curso / pendiente.
+- **Curva S programada (PV) vs ejecutada (EV)** y **SPI**, cruzando el
+  cronograma con el avance real de *Avance de obra*.
+  *No se calcula CPI: requiere costo real de obra, que no está ni en el modelo
+  ni en el presupuesto programado.*
+
+### Control de cambios entre versiones
+- Guarda una **instantánea** del modelo y compárala contra una exportación
+  posterior: qué se **añadió**, qué **desapareció** y qué **cambió** (con el
+  antes/después de cada parámetro).
+- Identidad por **GUID de IFC** (estable entre exportaciones de Revit).
+- Colorea los cambios en 3D, aísla cada grupo, y reporta el **impacto por
+  partida** (cuántos elementos ganó o perdió cada una). Export a Excel.
+
 ### Extras
 - **Ghost global** (toggle), **Caja de sección** de 6 planos arrastrables, y
   **Captura PNG** de la vista actual.
@@ -100,6 +145,12 @@ Visor BIM web para archivos IFC construido con el ecosistema de
 - **Matriz heatmap** de resultados: cada celda con el nº de interferencias y
   **escala de color** (amarillo → naranja → rojo). Click en una celda aísla,
   colorea de rojo y enfoca ese cruce.
+- **Seguimiento por choque**: estado **Abierto / Revisado / Resuelto** (con
+  filtro y color), **volumen de traslape** calculado por interferencia (la
+  lista se ordena por él: primero lo más grave) y **reporte Excel** del
+  detalle.
+- **Evaluaciones guardadas**: cada corrida se archiva con nombre, fecha,
+  tolerancia y precisión, y puede restaurar los estados de seguimiento.
 - Lista de cruces ordenada por cantidad, "Resaltar" todo, y export CSV.
 
 ### Temas visuales
@@ -156,6 +207,11 @@ src/
     sidebar.ts             Barra lateral de paneles desplegables
     toolbar.ts             Barra inferior de acciones rápidas
     grouping.ts            Agrupación por criterio (categoría/modelo/atributo/pset)
+    datacache.ts           Cache tabular compartido (solo elementos geométricos)
+    paramroles.ts          Mapeo parámetro → rol semántico + tabla de acero
+    partidas.ts            Árbol de partidas y metrado por unidad
+    schedule.ts            Contrato con bim4d_discretizer + EVM (SPI)
+    versions.ts            Instantáneas y diff entre versiones del modelo
     ui.ts                  Tipo de contexto de UI compartido
     dom.ts, icons.ts       Helpers de DOM, toasts e iconos SVG
   features/
@@ -171,7 +227,12 @@ src/
     markers.ts             Nivel 4 — marcadores (pines)
     bcf.ts                 Nivel 4 — issues / vistas guardadas
     inventory.ts           Nivel 5 — vista de inventario por categoría
-    clash.ts               Detección de interferencias + matriz heatmap
+    clash.ts               Interferencias + matriz heatmap + estados y volumen
+    mapping.ts             Configuración de datos (roles de parámetros)
+    partidas.ts            Panel de partidas y metrado
+    obras.ts               Avance de obra (valorización real por período)
+    schedule.ts            Cronograma 4D: Gantt, simulación, curva S y EVM
+    versions.ts            Control de cambios entre versiones
   panel.ts                 Render del panel de propiedades
   style.css                Estilos de toda la UI
 ```

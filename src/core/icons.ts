@@ -67,6 +67,21 @@ export const icons = {
   table: svg(
     '<rect x="3" y="3" width="18" height="18" rx="1"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>',
   ),
+  sliders: svg(
+    '<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h10M18 18h2"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="16" cy="18" r="2"/>',
+  ),
+  tree: svg(
+    '<path d="M4 5h6M4 5v14M4 12h6M4 19h6"/><rect x="12" y="3" width="8" height="4" rx="1"/><rect x="12" y="10" width="8" height="4" rx="1"/><rect x="12" y="17" width="8" height="4" rx="1"/>',
+  ),
+  calendar: svg(
+    '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  ),
+  gantt: svg(
+    '<path d="M3 4v16"/><rect x="6" y="5" width="9" height="3" rx="1"/><rect x="9" y="10.5" width="11" height="3" rx="1"/><rect x="6" y="16" width="7" height="3" rx="1"/>',
+  ),
+  compare: svg(
+    '<path d="M12 3v18"/><path d="M6 7H3l3-4 3 4H6zM6 7v10"/><path d="M18 17h3l-3 4-3-4h3zM18 17V7"/>',
+  ),
 } as const;
 
 export type IconName = keyof typeof icons;

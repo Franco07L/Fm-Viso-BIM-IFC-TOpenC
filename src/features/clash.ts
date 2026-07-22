@@ -20,14 +20,69 @@ interface ClashItem {
   box: THREE.Box3;
 }
 
+/** Estado de seguimiento de cada choque (flujo de coordinación). */
+export type ClashState = "open" | "reviewed" | "solved";
+
+const STATE_LABEL: Record<ClashState, string> = {
+  open: "Abierto",
+  reviewed: "Revisado",
+  solved: "Resuelto",
+};
+
+const STATE_ORDER: ClashState[] = ["open", "reviewed", "solved"];
+
 interface ClashPair {
   a: ClashItem;
   b: ClashItem;
   center: THREE.Vector3;
+  /** Identidad estable del choque (para conservar el estado entre corridas). */
+  id: string;
+  /** Volumen de la caja de intersección en m³ (0 si no se solapan las cajas). */
+  volume: number;
+  state: ClashState;
 }
+
+/** Evaluación guardada: una corrida de detección con su contexto. */
+interface Evaluation {
+  name: string;
+  at: number;
+  tolerance: number;
+  precision: "box" | "geometry";
+  criterionLabel: string;
+  count: number;
+  /** Estado por id de choque, para restaurar el seguimiento. */
+  states: Record<string, ClashState>;
+}
+
+const STATES_KEY = "bim-viewer-clash-states";
+const EVALS_KEY = "bim-viewer-clash-evals";
 
 const CLASH_COLOR = new THREE.Color("#ff3b3b");
 const IDENTITY = new THREE.Matrix4();
+
+function pairId(a: ClashItem, b: ClashItem): string {
+  const x = `${a.modelId}|${a.localId}`;
+  const y = `${b.modelId}|${b.localId}`;
+  return x < y ? `${x}#${y}` : `${y}#${x}`;
+}
+
+/** Volumen en m³ de la caja de intersección de dos cajas. */
+function intersectionVolume(a: THREE.Box3, b: THREE.Box3): number {
+  const inter = a.clone().intersect(b);
+  if (inter.isEmpty()) return 0;
+  const size = new THREE.Vector3();
+  inter.getSize(size);
+  return Math.max(0, size.x * size.y * size.z);
+}
+
+/** Formatea un volumen pequeño en la unidad más legible (m³/L/cm³). */
+function fmtVolume(m3: number): string {
+  if (m3 <= 0) return "—";
+  if (m3 >= 0.1) return `${m3.toFixed(3)} m³`;
+  const liters = m3 * 1000;
+  if (liters >= 0.1) return `${liters.toFixed(2)} L`;
+  return `${(m3 * 1e6).toFixed(0)} cm³`;
+}
 
 function crossKey(a: string, b: string): string {
   return a < b ? `${a}||${b}` : `${b}||${a}`;
@@ -38,6 +93,24 @@ function heatColor(count: number, max: number): string {
   const hue = (1 - t) * 48;
   const light = 72 - t * 24;
   return `hsl(${hue}, 92%, ${light}%)`;
+}
+
+function loadJson<T>(key: string, fallback: T): T {
+  try {
+    const saved = localStorage.getItem(key);
+    if (saved) return JSON.parse(saved) as T;
+  } catch {
+    /* sin storage */
+  }
+  return fallback;
+}
+
+function saveJson(key: string, value: unknown) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    /* sin storage */
+  }
 }
 
 export async function setupClash(viewer: Viewer, ui: UI) {
@@ -58,6 +131,11 @@ export async function setupClash(viewer: Viewer, ui: UI) {
   let clashes: ClashPair[] = [];
   let matrix = new Map<string, Map<string, ClashPair[]>>();
   let maxCell = 0;
+  /** Estado por id de choque: sobrevive a re-corridas y recargas. */
+  let states: Record<string, ClashState> = loadJson(STATES_KEY, {});
+  let evaluations: Evaluation[] = loadJson(EVALS_KEY, []);
+  /** Filtro de la lista de detalle por estado ("" = todos). */
+  let stateFilter: ClashState | "" = "";
   // Cache de geometría + BVH por elemento (modelId|localId). Persiste entre
   // detecciones mientras no cambien los modelos, para que re-correr sea rápido.
   const bvhCache = new Map<string, { geom: THREE.BufferGeometry; bvh: MeshBVH }[]>();
@@ -121,8 +199,31 @@ export async function setupClash(viewer: Viewer, ui: UI) {
 
   const listEl = el("div", "clash-list");
 
+  // --- Evaluaciones guardadas (histórico de corridas) ---
+  const evalWrap = el("details", "clash-evals");
+  const evalSummary = el("summary", undefined, "Evaluaciones guardadas");
+  const evalList = el("div", "clash-eval-list");
+  const saveEvalBtn = el("button", "btn small full", "Guardar esta evaluación");
+  saveEvalBtn.type = "button";
+  evalWrap.append(evalSummary, saveEvalBtn, evalList);
+
+  // --- Detalle por choque, con estados ---
+  const detailWrap = el("details", "clash-detail");
+  const detailSummary = el("summary", undefined, "Elementos con interferencia");
+  const detailBar = el("div", "panel-block row clash-filter-bar");
+  const stateDd = createDropdown([
+    { value: "", label: "Estado: todos" },
+    ...STATE_ORDER.map((s) => ({ value: s, label: `Estado: ${STATE_LABEL[s]}` })),
+  ]);
+  const excelBtn = el("button", "btn small", "Reporte Excel");
+  excelBtn.type = "button";
+  detailBar.append(stateDd.element, excelBtn);
+  const detailList = el("div", "clash-detail-list");
+  detailWrap.append(detailSummary, detailBar, detailList);
+
   panel.body.append(
-    intro, critRow, precRow, tolRow, configBtn, detectBtn, progressWrap, summary, actions, listEl,
+    intro, critRow, precRow, tolRow, configBtn, detectBtn, progressWrap, summary, actions,
+    listEl, detailWrap, evalWrap,
   );
 
   const yieldToUi = () => new Promise((r) => setTimeout(r, 0));
@@ -357,11 +458,21 @@ export async function setupClash(viewer: Viewer, ui: UI) {
         const inter = boxes[ia].clone().intersect(boxes[ib]);
         const center = new THREE.Vector3();
         (inter.isEmpty() ? boxes[ia] : inter).getCenter(center);
-        return { a: A, b: B, center };
+        const id = pairId(A, B);
+        return {
+          a: A,
+          b: B,
+          center,
+          id,
+          volume: intersectionVolume(boxes[ia], boxes[ib]),
+          // Un choque ya revisado/resuelto conserva su estado al re-detectar.
+          state: states[id] ?? "open",
+        };
       });
 
       buildMatrix();
       render();
+      renderDetail();
       if (!clashes.length) showToast("No se detectaron interferencias.", "info");
     } catch (error) {
       console.error("Error en la detección de interferencias:", error);
@@ -438,10 +549,7 @@ export async function setupClash(viewer: Viewer, ui: UI) {
     }
     rows.sort((p, q) => q.pairs.length - p.pairs.length);
 
-    panel.setBadge(clashes.length ? String(clashes.length) : null);
-    summary.textContent = clashes.length
-      ? `${clashes.length} interferencias en ${rows.length} cruces`
-      : "Sin resultados todavía.";
+    updateSummary();
 
     for (const { a, b, pairs } of rows) {
       const item = el("div", "clash-row");
@@ -463,6 +571,193 @@ export async function setupClash(viewer: Viewer, ui: UI) {
       listEl.append(item);
     }
   };
+
+  // ---------- Detalle por choque: estado, volumen y navegación ----------
+  const setState = (pair: ClashPair, next: ClashState) => {
+    pair.state = next;
+    states[pair.id] = next;
+    saveJson(STATES_KEY, states);
+    updateSummary();
+  };
+
+  const visibleClashes = (): ClashPair[] =>
+    stateFilter ? clashes.filter((c) => c.state === stateFilter) : clashes;
+
+  const shortLabel = (it: ClashItem): string => `${it.group} · #${it.localId}`;
+
+  const renderDetail = () => {
+    detailList.replaceChildren();
+    const list = visibleClashes();
+    detailSummary.textContent = `Elementos con interferencia (${list.length})`;
+
+    if (!clashes.length) {
+      detailList.append(el("p", "panel-empty", "Ejecuta la detección para ver el detalle."));
+      return;
+    }
+    if (!list.length) {
+      detailList.append(el("p", "panel-empty", "Ningún choque con ese estado."));
+      return;
+    }
+
+    // Los más grandes primero: el volumen de traslape prioriza la revisión.
+    const sorted = [...list].sort((a, b) => b.volume - a.volume);
+    const MAX = 200;
+
+    for (const pair of sorted.slice(0, MAX)) {
+      const row = el("div", `clash-detail-row st-${pair.state}`);
+
+      const info = el("div", "set-info");
+      info.append(el("span", "set-name", `${shortLabel(pair.a)} ↔ ${shortLabel(pair.b)}`));
+      info.append(el("span", "set-count", `Vol. traslape: ${fmtVolume(pair.volume)}`));
+
+      const stateSel = el("select", "clash-state") as HTMLSelectElement;
+      for (const s of STATE_ORDER) {
+        const opt = el("option", undefined, STATE_LABEL[s]) as HTMLOptionElement;
+        opt.value = s;
+        if (s === pair.state) opt.selected = true;
+        stateSel.append(opt);
+      }
+      stateSel.title = "Estado de seguimiento del choque";
+      stateSel.addEventListener("click", (e) => e.stopPropagation());
+      stateSel.addEventListener("change", () => {
+        setState(pair, stateSel.value as ClashState);
+        row.className = `clash-detail-row st-${pair.state}`;
+        if (stateFilter) renderDetail();
+      });
+
+      row.append(info, stateSel);
+      row.addEventListener("click", async () => {
+        await hider.isolate(idsByModel([pair]));
+        await paint([pair]);
+        await focusPairs([pair]);
+      });
+      detailList.append(row);
+    }
+
+    if (sorted.length > MAX) {
+      detailList.append(
+        el("p", "panel-hint", `Mostrando los ${MAX} de mayor volumen de ${sorted.length}.`),
+      );
+    }
+  };
+
+  const updateSummary = () => {
+    if (!clashes.length) {
+      summary.textContent = "Sin resultados todavía.";
+      return;
+    }
+    const open = clashes.filter((c) => c.state === "open").length;
+    const reviewed = clashes.filter((c) => c.state === "reviewed").length;
+    const solved = clashes.filter((c) => c.state === "solved").length;
+    summary.textContent = `${clashes.length} interferencias · ${open} abiertas · ${reviewed} revisadas · ${solved} resueltas`;
+    panel.setBadge(open ? String(open) : null);
+  };
+
+  // ---------- Evaluaciones guardadas ----------
+  const renderEvals = () => {
+    evalList.replaceChildren();
+    evalSummary.textContent = `Evaluaciones guardadas (${evaluations.length})`;
+    if (!evaluations.length) {
+      evalList.append(el("p", "panel-empty", "Guarda una corrida para comparar después."));
+      return;
+    }
+    for (const ev of [...evaluations].reverse()) {
+      const item = el("div", "clash-eval-item");
+      const info = el("div", "set-info");
+      info.append(el("span", "set-name", ev.name));
+      const when = new Date(ev.at).toLocaleString("es-PE");
+      info.append(
+        el(
+          "span",
+          "set-count",
+          `${ev.count} choque(s) · tol. ${ev.tolerance} m · ${ev.precision === "box" ? "cajas" : "geometría"} · ${when}`,
+        ),
+      );
+
+      const restoreBtn = el("button", "icon-btn sm");
+      restoreBtn.type = "button";
+      restoreBtn.innerHTML = icons.reset;
+      restoreBtn.title = "Restaurar los estados guardados en esta evaluación";
+      restoreBtn.addEventListener("click", () => {
+        states = { ...states, ...ev.states };
+        saveJson(STATES_KEY, states);
+        for (const c of clashes) c.state = states[c.id] ?? "open";
+        updateSummary();
+        renderDetail();
+        showToast(`Estados restaurados de «${ev.name}».`, "info");
+      });
+
+      const rmBtn = el("button", "icon-btn sm");
+      rmBtn.type = "button";
+      rmBtn.innerHTML = icons.trash;
+      rmBtn.title = "Eliminar esta evaluación";
+      rmBtn.addEventListener("click", () => {
+        evaluations = evaluations.filter((e) => e !== ev);
+        saveJson(EVALS_KEY, evaluations);
+        renderEvals();
+      });
+
+      item.append(info, restoreBtn, rmBtn);
+      evalList.append(item);
+    }
+  };
+
+  const saveEvaluation = () => {
+    if (!clashes.length) {
+      showToast("Primero ejecuta la detección.", "info");
+      return;
+    }
+    const critLabel = criteria.find((c) => c.value === criterion)?.label ?? "—";
+    const name = window.prompt(
+      "Nombre de la evaluación",
+      `${critLabel} · ${new Date().toLocaleDateString("es-PE")}`,
+    );
+    if (!name) return;
+    const snapshot: Record<string, ClashState> = {};
+    for (const c of clashes) snapshot[c.id] = c.state;
+    evaluations.push({
+      name,
+      at: Date.now(),
+      tolerance: Math.max(0, parseFloat(tolInput.value) || 0),
+      precision,
+      criterionLabel: critLabel,
+      count: clashes.length,
+      states: snapshot,
+    });
+    saveJson(EVALS_KEY, evaluations);
+    renderEvals();
+    showToast(`Evaluación «${name}» guardada.`, "info");
+  };
+
+  const exportDetailExcel = () => {
+    if (!clashes.length) {
+      showToast("Primero ejecuta la detección.", "info");
+      return;
+    }
+    const esc = (v: string) => `"${String(v).replace(/"/g, '""')}"`;
+    const head = [
+      "Estado", "Grupo A", "Elemento A", "Modelo A",
+      "Grupo B", "Elemento B", "Modelo B", "Volumen traslape (m3)",
+    ].join(";");
+    const lines = [...visibleClashes()]
+      .sort((a, b) => b.volume - a.volume)
+      .map((c) =>
+        [
+          esc(STATE_LABEL[c.state]),
+          esc(c.a.group), String(c.a.localId), esc(c.a.modelId),
+          esc(c.b.group), String(c.b.localId), esc(c.b.modelId),
+          c.volume.toFixed(6),
+        ].join(";"),
+      );
+    downloadFile("interferencias-detalle.csv", `﻿${head}\n${lines.join("\n")}`, "text/csv");
+  };
+
+  stateDd.onChange((v) => {
+    stateFilter = v as ClashState | "";
+    renderDetail();
+  });
+  excelBtn.addEventListener("click", exportDetailExcel);
+  saveEvalBtn.addEventListener("click", saveEvaluation);
 
   // ---------- Overlay: matriz de configuración de cruces ----------
   const showConfig = async () => {
@@ -657,7 +952,10 @@ export async function setupClash(viewer: Viewer, ui: UI) {
     disabled.clear();
     bvhCache.clear();
     render();
+    renderDetail();
   });
 
   render();
+  renderDetail();
+  renderEvals();
 }

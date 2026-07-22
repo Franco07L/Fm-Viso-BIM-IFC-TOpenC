@@ -22,6 +22,11 @@ import { setupDatatable } from "./features/datatable";
 import { setupAudit } from "./features/audit";
 import { setupFilters } from "./features/filters";
 import { setupSectionBox, setupCapture } from "./features/sectionbox";
+import { setupMapping } from "./features/mapping";
+import { setupPartidas } from "./features/partidas";
+import { setupObras } from "./features/obras";
+import { setupSchedule } from "./features/schedule";
+import { setupVersions } from "./features/versions";
 import "./style.css";
 
 async function main() {
@@ -56,6 +61,11 @@ async function main() {
 
   // Datos tabulares compartidos (tabla, auditoría, filtros) + extras
   initDataCache(viewer);
+  setupMapping(viewer, ui);
+  setupPartidas(viewer, ui);
+  setupObras(viewer, ui);
+  setupSchedule(viewer, ui);
+  setupVersions(viewer, ui);
   setupFilters(viewer, ui);
   setupAudit(viewer, ui);
   setupSectionBox(viewer, ui);

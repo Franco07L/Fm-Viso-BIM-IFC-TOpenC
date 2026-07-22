@@ -119,5 +119,12 @@ window.addEventListener("pointerdown", (e) => {
 window.addEventListener("keydown", (e) => {
   if (e.key === "Escape") closeOpen();
 });
-window.addEventListener("scroll", closeOpen, true);
+window.addEventListener(
+  "scroll",
+  (e) => {
+    if (openList && e.target instanceof Node && openList.contains(e.target)) return;
+    closeOpen();
+  },
+  true,
+);
 window.addEventListener("resize", closeOpen);
