@@ -3,6 +3,7 @@ import type { Viewer } from "../core/viewer";
 import type { UI } from "../core/ui";
 import { el, downloadFile, showToast } from "../core/dom";
 import { icons } from "../core/icons";
+import { railIcons } from "../core/railicons";
 
 interface Issue {
   id: number;
@@ -24,7 +25,8 @@ export function setupBcf(viewer: Viewer, ui: UI) {
 
   const panel = ui.sidebar.addPanel({
     id: "issues",
-    icon: icons.issue,
+    icon: railIcons.issues,
+    group: "collab",
     title: "Issues",
   });
 

@@ -6,6 +6,7 @@ import type { Viewer } from "../core/viewer";
 import type { UI } from "../core/ui";
 import { el, downloadFile, showToast } from "../core/dom";
 import { icons } from "../core/icons";
+import { railIcons } from "../core/railicons";
 import {
   resolveGroups,
   listCriteria,
@@ -142,7 +143,8 @@ export async function setupClash(viewer: Viewer, ui: UI) {
 
   const panel = ui.sidebar.addPanel({
     id: "clash",
-    icon: icons.clash,
+    icon: railIcons.interferencias,
+    group: "analyze",
     title: "Interferencias",
     onOpen: () => void refreshCriteria(),
   });
@@ -653,16 +655,18 @@ export async function setupClash(viewer: Viewer, ui: UI) {
     const solved = clashes.filter((c) => c.state === "solved").length;
 
     const bento = el("div", "bento");
-    for (const [cls, label, value] of [
+    const cells = [
       ["total", "Total", clashes.length],
       ["open", "Abiertas", open],
       ["reviewed", "Revisadas", reviewed],
       ["solved", "Resueltas", solved],
-    ] as const) {
+    ] as const;
+    cells.forEach(([cls, label, value], i) => {
       const cell = el("div", `bento-cell ${cls}`);
+      cell.style.setProperty("--i", String(i)); // escalona la entrada (stagger)
       cell.append(el("span", "bento-label", label), el("span", "bento-value", String(value)));
       bento.append(cell);
-    }
+    });
     summary.append(bento);
     panel.setBadge(open ? String(open) : null);
   };

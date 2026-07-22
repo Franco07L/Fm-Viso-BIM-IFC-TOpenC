@@ -1,7 +1,7 @@
 import type { Viewer } from "../core/viewer";
 import type { UI } from "../core/ui";
 import { el, showToast } from "../core/dom";
-import { icons } from "../core/icons";
+import { railIcons } from "../core/railicons";
 import { createDropdown, type Dropdown } from "../core/dropdown";
 import { getDataCache } from "../core/datacache";
 import {
@@ -30,7 +30,8 @@ export function setupMapping(viewer: Viewer, ui: UI) {
 
   const panel = ui.sidebar.addPanel({
     id: "mapping",
-    icon: icons.sliders,
+    icon: railIcons.configuracion,
+    group: "manage",
     title: "Configuración de datos",
     onOpen: () => void ensureLoaded(),
   });

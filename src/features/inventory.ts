@@ -4,7 +4,7 @@ import * as OBF from "@thatopen/components-front";
 import type { Viewer } from "../core/viewer";
 import type { UI } from "../core/ui";
 import { el, showToast } from "../core/dom";
-import { icons } from "../core/icons";
+import { railIcons } from "../core/railicons";
 import { createDropdown } from "../core/dropdown";
 
 /**
@@ -21,7 +21,8 @@ export function setupInventory(viewer: Viewer, ui: UI) {
 
   const panel = ui.sidebar.addPanel({
     id: "inventory",
-    icon: icons.grid,
+    icon: railIcons.inventario,
+    group: "explore",
     title: "Inventario",
     onOpen: () => void populate(),
   });

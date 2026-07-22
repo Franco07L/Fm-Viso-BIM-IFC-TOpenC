@@ -29,7 +29,7 @@ import { setupSchedule } from "./features/schedule";
 import { setupVersions } from "./features/versions";
 import { setupTopbar } from "./features/topbar";
 // Tipografías self-hosted (sin CDN, igual que el worker y el WASM).
-import "@fontsource-variable/space-grotesk";
+import "@fontsource-variable/outfit";
 import "@fontsource-variable/inter";
 import "@fontsource-variable/jetbrains-mono";
 import "./style.css";

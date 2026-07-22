@@ -4,6 +4,7 @@ import type { Viewer } from "../core/viewer";
 import type { UI } from "../core/ui";
 import { el, showToast } from "../core/dom";
 import { icons } from "../core/icons";
+import { railIcons } from "../core/railicons";
 import { createDropdown } from "../core/dropdown";
 import { getDataCache, type ElementRow } from "../core/datacache";
 
@@ -34,7 +35,8 @@ export function setupAudit(viewer: Viewer, ui: UI) {
 
   const panel = ui.sidebar.addPanel({
     id: "audit",
-    icon: icons.audit,
+    icon: railIcons.auditoria,
+    group: "analyze",
     title: "Auditoría",
     onOpen: () => void ensureLoaded(),
   });

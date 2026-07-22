@@ -4,7 +4,7 @@ import type { CameraProjection } from "@thatopen/components";
 import type { Viewer } from "../core/viewer";
 import type { UI } from "../core/ui";
 import { el, showToast } from "../core/dom";
-import { icons } from "../core/icons";
+import { railIcons } from "../core/railicons";
 
 type Orientation = "top" | "bottom" | "front" | "back" | "left" | "right";
 
@@ -27,7 +27,8 @@ export async function setupViews(viewer: Viewer, ui: UI) {
 
   const panel = ui.sidebar.addPanel({
     id: "views",
-    icon: icons.plans,
+    icon: railIcons.vistas,
+    group: "explore",
     title: "Vistas",
   });
 

@@ -4,6 +4,7 @@ import type { Viewer } from "../core/viewer";
 import type { UI } from "../core/ui";
 import { el, downloadFile, showToast } from "../core/dom";
 import { icons } from "../core/icons";
+import { railIcons } from "../core/railicons";
 import type { ElementRow } from "../core/datacache";
 import {
   deleteSnapshot,
@@ -36,7 +37,8 @@ export function setupVersions(viewer: Viewer, ui: UI) {
 
   const panel = ui.sidebar.addPanel({
     id: "versions",
-    icon: icons.compare,
+    icon: railIcons.versiones,
+    group: "manage",
     title: "Control de cambios",
     onOpen: () => render(),
   });

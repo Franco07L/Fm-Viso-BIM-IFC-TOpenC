@@ -4,6 +4,7 @@ import type { Viewer } from "../core/viewer";
 import type { UI } from "../core/ui";
 import { el, showToast } from "../core/dom";
 import { icons } from "../core/icons";
+import { railIcons } from "../core/railicons";
 import { createDropdown } from "../core/dropdown";
 import { getDataCache, COL_CATEGORY, type ElementRow } from "../core/datacache";
 import { showInTable } from "./datatable";
@@ -85,7 +86,8 @@ export function setupFilters(viewer: Viewer, ui: UI) {
 
   const panel = ui.sidebar.addPanel({
     id: "filters",
-    icon: icons.filter,
+    icon: railIcons.filtros,
+    group: "analyze",
     title: "Filtros",
     onOpen: () => void ensureLoaded(),
   });

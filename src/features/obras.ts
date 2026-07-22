@@ -4,6 +4,7 @@ import type { Viewer } from "../core/viewer";
 import type { UI } from "../core/ui";
 import { el, downloadFile, showToast } from "../core/dom";
 import { icons } from "../core/icons";
+import { railIcons } from "../core/railicons";
 import { createDropdown } from "../core/dropdown";
 import { getDataCache, type ElementRow } from "../core/datacache";
 import {
@@ -74,7 +75,8 @@ export function setupObras(viewer: Viewer, ui: UI) {
 
   const panel = ui.sidebar.addPanel({
     id: "obras",
-    icon: icons.calendar,
+    icon: railIcons.obras,
+    group: "manage",
     title: "Avance de obra",
     onOpen: () => void ensureLoaded(),
   });

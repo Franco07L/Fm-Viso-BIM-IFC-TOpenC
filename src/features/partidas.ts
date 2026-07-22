@@ -4,6 +4,7 @@ import type { Viewer } from "../core/viewer";
 import type { UI } from "../core/ui";
 import { el, downloadFile, showToast } from "../core/dom";
 import { icons } from "../core/icons";
+import { railIcons } from "../core/railicons";
 import type { ElementRow } from "../core/datacache";
 import { onRolesChange, roleColumn } from "../core/paramroles";
 import {
@@ -32,7 +33,8 @@ export function setupPartidas(viewer: Viewer, ui: UI) {
 
   const panel = ui.sidebar.addPanel({
     id: "partidas",
-    icon: icons.tree,
+    icon: railIcons.partidas,
+    group: "manage",
     title: "Partidas",
     onOpen: () => void ensureBuilt(),
   });

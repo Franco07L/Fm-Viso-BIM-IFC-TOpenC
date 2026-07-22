@@ -1,4 +1,5 @@
 import { el } from "./dom";
+import { GROUP_COLOR, type RailGroup } from "./railicons";
 
 export interface PanelHandle {
   /** Contenedor donde la funcionalidad inyecta su contenido. */
@@ -16,6 +17,8 @@ export interface Sidebar {
     id: string;
     icon: string;
     title: string;
+    /** Grupo de función: tiñe el icono con el color semántico del grupo. */
+    group?: RailGroup;
     onOpen?: () => void;
   }): PanelHandle;
   /** Registra un botón de acción simple (sin panel). */
@@ -94,13 +97,17 @@ export function createSidebar(host: HTMLElement): Sidebar {
     // Cambiar de panel con el drawer ya abierto no reinicia la entrada — solo
     // se anima al aparecer desde cerrado, cambiar de pestaña no debe parpadear.
     drawer.classList.add("open");
+    // Abrir un panel cierra el menú "Vista" de la barra: nunca dos capas juntas.
+    document.dispatchEvent(new CustomEvent("ui:panel-open"));
     entry.onOpen?.();
   };
 
   drawerClose.addEventListener("click", close);
+  // Si se abre el menú "Vista", este drawer se cierra.
+  document.addEventListener("ui:menu-open", close);
 
   return {
-    addPanel({ id, icon, title, onOpen }) {
+    addPanel({ id, icon, title, group, onOpen }) {
       const button = el("button", "rail-btn");
       button.type = "button";
       button.innerHTML = icon;
@@ -108,6 +115,13 @@ export function createSidebar(host: HTMLElement): Sidebar {
       // ~1s en aparecer y no se puede estilizar con el tema.
       button.dataset.label = title;
       button.setAttribute("aria-label", title);
+      // Color del grupo: el icono ilustrado lee --ic / --ic-soft.
+      if (group) {
+        const c = GROUP_COLOR[group];
+        button.dataset.group = group;
+        button.style.setProperty("--ic", c);
+        button.style.setProperty("--ic-soft", `color-mix(in srgb, ${c} 22%, transparent)`);
+      }
 
       const badge = el("span", "rail-badge");
       badge.hidden = true;
@@ -128,9 +142,16 @@ export function createSidebar(host: HTMLElement): Sidebar {
         setBadge(text) {
           if (text === null || text === "") {
             badge.hidden = true;
-          } else {
-            badge.textContent = text;
-            badge.hidden = false;
+            return;
+          }
+          const changed = badge.textContent !== text;
+          badge.textContent = text;
+          badge.hidden = false;
+          // Rebota solo cuando el valor cambia (no en cada render idéntico).
+          if (changed) {
+            badge.classList.remove("bump");
+            void badge.offsetWidth; // reinicia la animación
+            badge.classList.add("bump");
           }
         },
         open: () => open(id),

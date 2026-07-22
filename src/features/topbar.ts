@@ -32,12 +32,19 @@ export function setupTopbar() {
     menu.classList.add("open");
     gear.classList.add("open");
     gear.setAttribute("aria-expanded", "true");
+    // Abrir Vista cierra cualquier panel del rail: nunca dos capas a la vez.
+    document.dispatchEvent(new CustomEvent("ui:menu-open"));
   };
 
   gear.addEventListener("click", (e) => {
     e.stopPropagation();
     if (menu.hidden) open();
     else close();
+  });
+
+  // Si se abre un panel del rail, este menú se cierra (y viceversa vía window).
+  document.addEventListener("ui:panel-open", () => {
+    if (!menu.hidden) close();
   });
 
   // El menú no se cierra al usarlo por dentro (cambiar estilo, tema…), solo al

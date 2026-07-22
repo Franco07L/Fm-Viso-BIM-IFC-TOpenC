@@ -4,6 +4,7 @@ import type { Viewer } from "../core/viewer";
 import type { UI } from "../core/ui";
 import { el, downloadFile, showToast } from "../core/dom";
 import { icons } from "../core/icons";
+import { railIcons } from "../core/railicons";
 import { getDataCache, type ElementRow } from "../core/datacache";
 import { onRolesChange, roleColumn, roleValue } from "../core/paramroles";
 import {
@@ -47,7 +48,8 @@ export function setupSchedule(viewer: Viewer, ui: UI) {
 
   const panel = ui.sidebar.addPanel({
     id: "schedule",
-    icon: icons.gantt,
+    icon: railIcons.cronograma,
+    group: "manage",
     title: "Cronograma 4D",
     onOpen: () => void ensureIndexed(),
   });

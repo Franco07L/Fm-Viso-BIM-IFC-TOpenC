@@ -4,6 +4,7 @@ import type { Viewer } from "../core/viewer";
 import type { UI } from "../core/ui";
 import { el, downloadFile, showToast } from "../core/dom";
 import { icons } from "../core/icons";
+import { railIcons } from "../core/railicons";
 import {
   resolveGroups,
   listCriteria,
@@ -57,7 +58,8 @@ export async function setupClassification(viewer: Viewer, ui: UI) {
 
   const panel = ui.sidebar.addPanel({
     id: "sets",
-    icon: icons.layers,
+    icon: railIcons.conjuntos,
+    group: "explore",
     title: "Conjuntos",
     onOpen: () => void refreshCriteria(),
   });

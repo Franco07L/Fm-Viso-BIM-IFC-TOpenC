@@ -132,11 +132,11 @@
    nunca desde un CDN: el visor debe funcionar igual en obra sin internet,
    como ya hacemos con el worker y el WASM.
 
-   · Marca/títulos → Space Grotesk: geométrica, técnica, con carácter.
+   · Marca/títulos → Outfit: redonda, expresiva, elegante; da personalidad.
    · UI            → Inter: legible a 11–13px, que es el tamaño real de este visor.
    · Datos         → JetBrains Mono: cifras tabulares, columnas que alinean. */
 :root {
-  --font-brand: "Space Grotesk Variable", "Space Grotesk", system-ui, sans-serif;
+  --font-brand: "Outfit Variable", Outfit, system-ui, sans-serif;
   --font-ui: "Inter Variable", Inter, "Segoe UI", system-ui, sans-serif;
   --font-mono: "JetBrains Mono Variable", "JetBrains Mono", Consolas, monospace;
 
@@ -171,12 +171,29 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Marca y títulos */
+/* Marca y títulos — Outfit se usa donde el texto comunica jerarquía o marca,
+   no en el cuerpo denso (ahí manda Inter por legibilidad a tamaño pequeño). */
 .brand-text strong,
 .drawer-title,
 .matrix-head h3,
-#panel-header h2 {
+#panel-header h2,
+.tb-menu-title,
+.roles-group-title,
+.bento-label,
+.curve-stat-label,
+.btn.primary,
+.rail-btn::after,
+.view-btn {
   font-family: var(--font-brand);
+}
+
+/* Outfit tiene más contraste de peso que Space Grotesk: un pelín más de
+   letter-spacing en mayúsculas la asienta sin que se vea apretada. */
+.drawer-title,
+.tb-menu-title,
+.roles-group-title,
+.bento-label {
+  letter-spacing: 0.4px;
 }
 
 * {
@@ -418,6 +435,20 @@ body {
   border-color: transparent;
   color: var(--btn-text);
   box-shadow: var(--glow);
+}
+
+/* Feedback de presión: el botón se hunde levemente al pulsar. En todos los
+   .btn; los primarios además apagan el glow un instante. */
+.btn:active {
+  transform: scale(0.96);
+}
+
+.btn.primary:active {
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn:active { transform: none; }
 }
 
 .btn.primary:hover {
@@ -711,7 +742,7 @@ body {
   position: fixed;
   top: 80px;
   left: 50%;
-  transform: translate(-50%, -8px);
+  transform: translate(-50%, -18px);
   padding: 10px 18px;
   font-size: 13px;
   font-weight: 600;
@@ -719,12 +750,18 @@ body {
   background: #3a2026;
   border: 1px solid #6e3641;
   border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
   opacity: 0;
   pointer-events: none;
+  /* Entra deslizando desde arriba con un leve overshoot (spring). */
   transition:
-    opacity 0.2s,
-    transform 0.2s;
+    opacity 0.22s ease-out,
+    transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
   z-index: 70;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #toast { transition: opacity 0.2s; }
 }
 
 #toast.visible {
@@ -769,21 +806,81 @@ body {
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
+/* Con iconos ilustrados, el estado se comunica con el COLOR DEL GRUPO (--ic),
+   no con el acento del tema: así el rail se lee como 4 familias de función. */
 .rail-btn:hover {
   color: var(--text);
-  background: var(--surface-2);
-  border-color: var(--border);
+  background: color-mix(in srgb, var(--ic, var(--accent)) 12%, transparent);
+  border-color: color-mix(in srgb, var(--ic, var(--accent)) 35%, transparent);
 }
 
 .rail-btn.active {
-  color: var(--accent-text);
-  background: var(--accent);
-  border-color: var(--accent);
+  background: color-mix(in srgb, var(--ic, var(--accent)) 18%, transparent);
+  border-color: color-mix(in srgb, var(--ic, var(--accent)) 55%, transparent);
 }
 
 .rail-btn svg {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
+}
+
+/* Icono ilustrado: reposa levemente atenuado y toma color pleno al hover/activo,
+   con un empujoncito de escala. La transición vive en el <svg>. */
+.rail-btn .ic-ill {
+  opacity: 0.82;
+  transition: opacity 0.18s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.rail-btn:hover .ic-ill,
+.rail-btn.active .ic-ill {
+  opacity: 1;
+  transform: scale(1.08);
+}
+
+/* Firma de movimiento por grupo: al ACTIVARSE el panel, su icono hace un gesto
+   relacionado con la naturaleza de la familia. Se dispara una vez (la clase
+   .active persiste), y el hover/active de arriba mantiene la escala luego. */
+.rail-btn.active[data-group="explore"] .ic-ill {
+  animation: sigFloat 0.5s ease-out;
+}
+.rail-btn.active[data-group="analyze"] .ic-ill {
+  animation: sigScan 0.5s ease-out;
+}
+.rail-btn.active[data-group="manage"] .ic-ill {
+  animation: sigRise 0.5s ease-out;
+}
+.rail-btn.active[data-group="collab"] .ic-ill {
+  animation: sigWobble 0.55s ease-out;
+}
+
+/* explorar: flota y se asienta (mirar alrededor) */
+@keyframes sigFloat {
+  0% { transform: translateY(0) scale(1.08); }
+  45% { transform: translateY(-3px) scale(1.12); }
+  100% { transform: translateY(0) scale(1.08); }
+}
+/* analizar: pulso de escaneo (barrido de detección) */
+@keyframes sigScan {
+  0% { transform: scale(1.08); }
+  30% { transform: scale(0.92); }
+  60% { transform: scale(1.16); }
+  100% { transform: scale(1.08); }
+}
+/* gestionar: se eleva (construir/ordenar hacia arriba) */
+@keyframes sigRise {
+  0% { transform: translateY(4px) scale(1); opacity: 0.6; }
+  100% { transform: translateY(0) scale(1.08); opacity: 1; }
+}
+/* colaborar: pequeño balanceo (conversación) */
+@keyframes sigWobble {
+  0%, 100% { transform: rotate(0) scale(1.08); }
+  25% { transform: rotate(-7deg) scale(1.1); }
+  60% { transform: rotate(5deg) scale(1.1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail-btn .ic-ill { transition: none; }
+  .rail-btn.active[data-group] .ic-ill { animation: none; }
 }
 
 .rail-badge {
@@ -802,13 +899,29 @@ body {
   border-radius: 999px;
 }
 
+/* El badge rebota cada vez que su número cambia (sidebar.ts re-dispara la clase).
+   Comunica "hay un resultado nuevo" sin que el usuario tenga que abrir el panel. */
+.rail-badge.bump {
+  animation: badgeBump 0.42s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes badgeBump {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.45); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail-badge.bump { animation: none; }
+}
+
 .rail-sep {
   height: 1px;
   margin: 6px 8px;
   background: color-mix(in srgb, var(--border) 75%, transparent);
 }
 
-/* Marca de panel activo: barra a la izquierda del icono */
+/* Marca de panel activo: barra a la izquierda del icono, en el color del grupo */
 .rail-btn::before {
   content: "";
   position: absolute;
@@ -816,7 +929,7 @@ body {
   top: 50%;
   width: 3px;
   height: 0;
-  background: var(--accent-2);
+  background: var(--ic, var(--accent-2));
   border-radius: 0 3px 3px 0;
   transform: translateY(-50%);
   transition: height 0.18s ease;
@@ -2058,6 +2171,25 @@ body {
   border: 1px solid var(--border);
   border-left: 3px solid var(--border);
   border-radius: 9px;
+  /* Entran una tras otra (stagger) al aparecer el resumen: el ojo lee la cifra
+     total, luego el desglose. El delay por celda lo pone el JS con --i. */
+  animation: bentoIn 0.34s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-delay: calc(var(--i, 0) * 55ms);
+}
+
+@keyframes bentoIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bento-cell { animation: none; }
 }
 
 .bento-label {
