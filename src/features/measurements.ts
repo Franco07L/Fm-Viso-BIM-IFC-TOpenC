@@ -3,7 +3,7 @@ import type * as OBC from "@thatopen/components";
 import type { Viewer } from "../core/viewer";
 import type { UI } from "../core/ui";
 import { showToast } from "../core/dom";
-import { icons } from "../core/icons";
+import { toolIcons } from "../core/toolicons";
 
 // Interfaz estructural común a las 4 mediciones (sus genéricos concretos las
 // hacen incompatibles entre sí, pero comparten estos métodos).
@@ -47,7 +47,7 @@ export function setupMeasurements(viewer: Viewer, ui: UI) {
   const labelSpan = () => button.element.querySelector("span") as HTMLElement;
 
   const button = ui.bottomBar.addButton({
-    icon: icons.ruler,
+    icon: toolIcons.medir,
     label: "Medir",
     group: "tool",
     title: "Medir: doble-click pone puntos · Enter cierra · Supr borra · pulsa para cambiar de tipo",
@@ -63,7 +63,7 @@ export function setupMeasurements(viewer: Viewer, ui: UI) {
   });
 
   ui.bottomBar.addButton({
-    icon: icons.reset,
+    icon: toolIcons.sinMedidas,
     label: "Sin medidas",
     group: "tool",
     subtle: true,

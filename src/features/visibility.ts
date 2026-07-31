@@ -2,7 +2,7 @@ import * as OBC from "@thatopen/components";
 import type { Viewer } from "../core/viewer";
 import type { UI } from "../core/ui";
 import { showToast } from "../core/dom";
-import { icons } from "../core/icons";
+import { toolIcons } from "../core/toolicons";
 
 /**
  * Nivel 1 — Visibilidad. Acciones rápidas en la barra inferior:
@@ -80,28 +80,28 @@ export function setupVisibility(viewer: Viewer, ui: UI) {
 
   const { bottomBar } = ui;
   bottomBar.addButton({
-    icon: icons.eye,
+    icon: toolIcons.todo,
     label: "Todo",
     group: "view",
     title: "Restaurar vista: muestra todo, quita colores y transparencias aplicados por cualquier panel",
     onClick: () => void showAll(),
   });
   bottomBar.addButton({
-    icon: icons.focus,
+    icon: toolIcons.aislar,
     label: "Aislar",
     group: "view",
     title: "Aislar la selección (oculta el resto)",
     onClick: () => void isolate(),
   });
   bottomBar.addButton({
-    icon: icons.eyeOff,
+    icon: toolIcons.ocultar,
     label: "Ocultar",
     group: "view",
     title: "Ocultar la selección",
     onClick: () => void hide(),
   });
   ghostBtn = bottomBar.addButton({
-    icon: icons.ghost,
+    icon: toolIcons.ghost,
     label: "Ghost",
     group: "view",
     title: "Fantasma global: todo translúcido (la selección queda sólida). Pulsa de nuevo para restaurar.",
@@ -109,7 +109,7 @@ export function setupVisibility(viewer: Viewer, ui: UI) {
   });
   bottomBar.addSeparator();
   bottomBar.addButton({
-    icon: icons.home,
+    icon: toolIcons.encuadrar,
     label: "Encuadrar",
     group: "view",
     title: "Encuadrar el modelo (tecla Inicio)",

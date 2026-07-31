@@ -2,7 +2,7 @@ import * as OBC from "@thatopen/components";
 import type { Viewer } from "../core/viewer";
 import type { UI } from "../core/ui";
 import { showToast } from "../core/dom";
-import { icons } from "../core/icons";
+import { toolIcons } from "../core/toolicons";
 
 /**
  * Nivel 3 — Cortes (planos de sección).
@@ -27,7 +27,7 @@ export function setupSections(viewer: Viewer, ui: UI) {
   });
 
   const button = ui.bottomBar.addButton({
-    icon: icons.scissors,
+    icon: toolIcons.cortar,
     label: "Cortar",
     group: "tool",
     title: "Modo corte: doble-click crea un plano · Supr borra · vuelve a pulsar para salir",
@@ -43,7 +43,7 @@ export function setupSections(viewer: Viewer, ui: UI) {
   });
 
   ui.bottomBar.addButton({
-    icon: icons.reset,
+    icon: toolIcons.sinCortes,
     label: "Sin cortes",
     group: "tool",
     subtle: true,

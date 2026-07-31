@@ -3,7 +3,7 @@ import * as OBC from "@thatopen/components";
 import type { Viewer } from "../core/viewer";
 import type { UI } from "../core/ui";
 import { showToast } from "../core/dom";
-import { icons } from "../core/icons";
+import { toolIcons } from "../core/toolicons";
 
 /**
  * Fase C — Caja de sección (estilo BIMETRYC/Speckle): 6 planos de corte que
@@ -119,7 +119,7 @@ export function setupSectionBox(viewer: Viewer, ui: UI) {
   };
 
   ui.bottomBar.addButton({
-    icon: icons.cube,
+    icon: toolIcons.caja,
     label: "Caja",
     group: "tool",
     title: "Caja de sección alrededor de lo visible (o la selección). Arrastra los gizmos para ajustarla.",
@@ -145,7 +145,7 @@ export function setupSectionBox(viewer: Viewer, ui: UI) {
 /** Captura PNG del visor tal como se ve (respeta tema, estilos y ambiente). */
 export function setupCapture(viewer: Viewer, ui: UI) {
   ui.bottomBar.addButton({
-    icon: icons.camera,
+    icon: toolIcons.captura,
     label: "Captura",
     group: "data",
     title: "Descargar una imagen PNG de la vista actual",

@@ -42,7 +42,12 @@ export function createBottomBar(host: HTMLElement): BottomBar {
       button.title = title;
       button.setAttribute("aria-label", title);
       button.innerHTML = `${icon}<span>${label}</span>`;
-      if (group) button.style.setProperty("--ic", TOOL_COLOR[group]);
+      if (group) {
+        const c = TOOL_COLOR[group];
+        button.style.setProperty("--ic", c);
+        // Relleno de familia que usan los iconos ilustrados (toolicons.ts).
+        button.style.setProperty("--ic-soft", `color-mix(in srgb, ${c} 24%, transparent)`);
+      }
       if (subtle) button.classList.add("subtle");
 
       const control: ToolButton = {

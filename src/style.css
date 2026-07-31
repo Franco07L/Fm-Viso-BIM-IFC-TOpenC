@@ -1303,9 +1303,21 @@ body {
 }
 
 .tool-btn svg {
-  width: 21px;
-  height: 21px;
+  width: 22px;
+  height: 22px;
   transition: color 0.16s, transform 0.16s;
+}
+
+/* Los iconos ilustrados llevan relleno de familia siempre; en reposo se
+   atenúa para que la barra se lea neutra, y toma cuerpo al interactuar. */
+.tool-btn .ic-tool {
+  opacity: 0.88;
+}
+
+.tool-btn:hover:not(:disabled) .ic-tool,
+.tool-btn.active .ic-tool {
+  opacity: 1;
+  transform: translateY(-1px);
 }
 
 .tool-sep {

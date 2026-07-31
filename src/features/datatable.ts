@@ -3,6 +3,7 @@ import type { Viewer } from "../core/viewer";
 import type { UI } from "../core/ui";
 import { el, downloadFile, showToast } from "../core/dom";
 import { icons } from "../core/icons";
+import { toolIcons } from "../core/toolicons";
 import { createDropdown } from "../core/dropdown";
 import {
   getDataCache,
@@ -253,7 +254,7 @@ export function setupDatatable(viewer: Viewer, ui: UI) {
   apiOpen = (keys) => void open(keys);
 
   const tableBtn = ui.bottomBar.addButton({
-    icon: icons.table,
+    icon: toolIcons.tabla,
     label: "Tabla",
     group: "data",
     title: "Tabla BIM: todos los elementos con sus propiedades, export Excel/CSV/JSON",
