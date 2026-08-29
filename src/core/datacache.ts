@@ -16,6 +16,13 @@ export interface ElementRow {
   localId: number;
   /** Clave única `${modelId}|${localId}` para sets/filtros. */
   key: string;
+  /**
+   * GlobalId del IFC. Es la ÚNICA identidad estable entre exportaciones: el
+   * `localId` se renumera en cada export de Revit. Lo consume el Control de
+   * cambios para comparar dos versiones del mismo modelo. Vacío si el IFC no
+   * lo trae (modelo mal exportado): ahí no se puede diferenciar de forma fiable.
+   */
+  guid: string;
   /** Valores por columna; "" significa vacío/faltante. */
   values: Record<string, string>;
 }
@@ -167,7 +174,17 @@ async function build(viewer: Viewer, onProgress?: Progress): Promise<DataCache> 
           }
         }
 
-        rows.push({ modelId, localId: ids[j], key: `${modelId}|${ids[j]}`, values });
+        // `_guid` ya viene en la respuesta de getItemsData; el bucle de arriba lo
+        // descarta por empezar con "_" (no es un dato tabular que mostrar), así
+        // que se lee aparte y se guarda como identidad, no como columna.
+        const guid = attrValue(d._guid);
+        rows.push({
+          modelId,
+          localId: ids[j],
+          key: `${modelId}|${ids[j]}`,
+          guid: typeof guid === "string" ? guid : "",
+          values,
+        });
       }
 
       done += ids.length;

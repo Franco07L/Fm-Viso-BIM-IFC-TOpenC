@@ -153,6 +153,19 @@ export function setupVersions(viewer: Viewer, ui: UI) {
           `${snap.items.length} elementos · ${new Date(snap.at).toLocaleString("es-PE")}`,
         ),
       );
+      // Sin GlobalId no hay identidad estable entre exportaciones: comparar
+      // daría todo como cambiado. Vale más avisarlo que dar un diff falso.
+      if ((snap.guidCoverage ?? 1) < 0.99) {
+        const pct = Math.round((snap.guidCoverage ?? 0) * 100);
+        const warn = el(
+          "span",
+          "ver-warn",
+          `⚠ Solo ${pct}% de los elementos tiene GlobalId: la comparación con otra exportación no será fiable.`,
+        );
+        warn.title =
+          "El IFC debe exportarse conservando los GlobalId (IfcGloballyUniqueId). Sin ellos, el visor no puede saber qué elemento es cuál entre dos versiones.";
+        info.append(warn);
+      }
 
       const cmpBtn = el("button", "btn small", "Comparar");
       cmpBtn.type = "button";

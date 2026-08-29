@@ -2890,3 +2890,11 @@ body {
     width: min(78vw, 300px);
   }
 }
+
+/* Aviso de cobertura de GlobalId en Control de cambios */
+.ver-warn {
+  margin-top: 3px;
+  font-size: var(--fs-2xs);
+  line-height: 1.35;
+  color: #ffb43d;
+}

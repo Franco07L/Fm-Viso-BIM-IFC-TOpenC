@@ -31,6 +31,12 @@ export interface Snapshot {
   /** Parámetros que se compararon (los roles configurados + base). */
   tracked: string[];
   items: SnapshotItem[];
+  /**
+   * Fracción de elementos que traían GlobalId (0..1). Por debajo de 1 la
+   * comparación entre exportaciones distintas deja de ser fiable, porque esos
+   * elementos caen a una identidad basada en el `localId`, que se renumera.
+   */
+  guidCoverage: number;
 }
 
 export type ChangeKind = "added" | "removed" | "modified";
@@ -54,15 +60,13 @@ export interface DiffResult {
   unchanged: number;
 }
 
-/**
- * Identidad del elemento entre exportaciones. El `localId` cambia en cada
- * export de Revit, así que se prefiere el GUID de IFC; si no está, se cae a
- * categoría+nombre (menos fiable pero suficiente para comparar revisiones).
- */
+/** Identidad del elemento entre exportaciones distintas del mismo proyecto. */
 function identityOf(row: ElementRow): string {
-  const guid =
-    row.values.GlobalId ?? row.values.Guid ?? row.values.GUID ?? row.values._guid;
-  if (guid) return `guid:${guid}`;
+  // El GlobalId del IFC es lo único estable entre exportaciones. El `localId`
+  // se renumera en cada export de Revit, así que un fallback basado en él
+  // marcaría TODO como cambiado al comparar dos exportaciones distintas: por
+  // eso, sin GUID, la comparación no es fiable y se avisa (ver `guidCoverage`).
+  if (row.guid) return `guid:${row.guid}`;
   return `nk:${row.values[COL_CATEGORY] ?? ""}|${row.values[COL_NAME] ?? ""}|${row.localId}`;
 }
 
@@ -98,7 +102,9 @@ export async function takeSnapshot(name: string): Promise<Snapshot> {
       values,
     };
   });
-  return { name, at: Date.now(), tracked, items };
+  const withGuid = cache.rows.filter((r) => r.guid).length;
+  const guidCoverage = cache.rows.length ? withGuid / cache.rows.length : 0;
+  return { name, at: Date.now(), tracked, items, guidCoverage };
 }
 
 export function listSnapshots(): Snapshot[] {
